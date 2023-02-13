@@ -1,0 +1,26 @@
+{
+  "name": "alisa.array",
+  "version": "0.0.1",
+  "description": "Advanced functions that are not in JavaScript's default array functions",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pordarman/alisa.array.git"
+  },
+  "keywords": [
+    "array",
+    "jsarray",
+    "arrayjs",
+    "js",
+    "javascript",
+    "javascript-array",
+    "advanced-array",
+    "enhanced-array"
+  ],
+  "author": "Fearless Crazy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pordarman/alisa.array/issues"
+  },
+  "homepage": "https://github.com/pordarman/alisa.array#readme"
+}
