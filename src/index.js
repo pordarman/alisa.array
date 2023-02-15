@@ -397,6 +397,124 @@ Array.prototype.pushWithSort = function (value) {
 
 
 /**
+ * Swaps two values in the original array
+ * @param {Number} index1 - Index value of the index to be changed
+ * @param {Number} index2 - Index value of the index to be changed
+ * @example
+ * // First let's create an array
+ * const array = [4, 2, 3, 1, 5]
+ * 
+ * // And then let's replace index 0 with index 3
+ * array.swap(0, 4);
+ * 
+ * console.log(array)
+ * // [1, 2, 3, 4, 5]
+ * @returns {Array}
+ */
+
+Array.prototype.swap = function (index1, index2) {
+
+    // Converts the entered value to a number
+    index1 = Math.floor(index1);
+    index2 = Math.floor(index2);
+
+    // If at least one of the entered values is not a number, return the array without changing anything
+    if (isNaN(index1) || isNaN(index2)) return this;
+
+    // Then we replace the values corresponding to those indexes.
+    [this[index1], this[index2]] = [this[index2], this[index1]];
+
+    return this;
+
+}
+
+
+
+/**
+ * Counts how many times the value you entered occurs in the array, if you entered a function instead of a value, it returns the number of values that provide the function
+ * @param {any} value - Value to count in array
+ * @example
+ * // First let's create an array
+ * const array = [1, 2, 3, 4, 5]
+ * 
+ * // Then let's see how many times 1 is in the series.
+ * const countOne = array.count(1)
+ * 
+ * console.log(countOne) // 1
+ * 
+ * // Now let's see how many numbers greater than 3 are in the array
+ * const greaterThan3 = array.count((number, index, thisArray) => number > 3)
+ * 
+ * console.log(greaterThan3) // 2
+ * @returns {Number}
+ */
+
+Array.prototype.count = function (value) {
+
+    // Return 0 if no value parameter is entered
+    if (!(0 in arguments)) return 0;
+
+    let total = 0;
+
+    // Use this loop if the entered value is a function
+    if (typeof value === "function") {
+
+        for (const index in this) {
+            if (value(this[index], index, this)) total += 1;
+        }
+
+    }
+
+    // Use this loop if the entered value is not a function
+    else {
+
+        for (const inputArray of this) {
+            if (sameValue(inputArray, value)) total += 1;
+        }
+
+    }
+
+    return total;
+
+}
+
+
+
+/**
+ * Randomly shuffles elements in an array
+ * @example
+ * // First let's create an array
+ * const array = [1, 2, 3, 4, 5]
+ * 
+ * // Then let's randomly shuffle the elements in the array
+ * const shuffle1 = array.shuffle()
+ * 
+ * console.log(shuffle1) // [4, 2, 5, 3, 1]
+ * 
+ * const shuffle2 = array.shuffle()
+ * 
+ * console.log(shuffle2) // [3, 1, 4, 2, 5]
+ * @returns {Array}
+ */
+
+Array.prototype.shuffle = function () {
+
+    // To make the code more optimised, we first save the length of the array
+    let length = this.length;
+
+    // And we save a copy of the array
+    let copyArray = [...this];
+
+    // Then we randomly shuffle the array using the Array.from function
+    return Array.from({ length }, () => {
+        return copyArray.splice(Math.floor(Math.random() * length--), 1)[0]
+    })
+
+}
+
+
+
+/**
  * Returns the different values between the array you entered and the original array
  * @param {Array} inputArray - Array to check
  * @example

@@ -67,7 +67,7 @@ console.log(filterAndMap);
 
 ## `Here are all the features:`
 
-- **`sameArray()`** => Checks if the array entered in the function is the same as the array
+- **`sameArray()`** => Checks if the array entered in the function is the same as the array.
 ```js
 const array = [1, 2, 3, 4, 5];
 
@@ -77,7 +77,7 @@ console.log(array.sameArray([1, 2, 3, 4, 5])) // true
 
 <br>
 
-- **`allIndexOf()`** => Returns all index values that satisfy the value you entered
+- **`allIndexOf()`** => Returns all index values that satisfy the value you entered.
 ```js
 const array = [1, 2, 3, 4, 5, 1, 2];
 
@@ -87,7 +87,7 @@ console.log(array.allIndexOf(6)) // -1
 
 <br>
 
-- **`findIndexAll()`** => Returns all index values that satisfy the function you entered
+- **`findIndexAll()`** => Returns all index values that satisfy the function you entered.
 ```js
 const array = [1, 2, 3, 4, 5];
 
@@ -97,7 +97,7 @@ console.log(array.findIndexAll(number => number < 0)) // -1
 
 <br>
 
-- **`concatAll()`** => Returns a new array by concatenating all the strings you entered in it
+- **`concatAll()`** => Returns a new array by concatenating all the strings you entered in it.
 ```js
 const array = [1, 2, 3, 4, 5];
 
@@ -107,7 +107,7 @@ console.log(array.concatAll([6, 7], [8, 9, 10]))
 
 <br>
 
-- **`filterAndMap()`** => Saves time and memory by performing both filtering and mapping at the same time
+- **`filterAndMap()`** => Saves time and memory by performing both filtering and mapping at the same time.
 ```js
 const array = [1, 2, 3, 4, 5];
 
@@ -120,7 +120,7 @@ console.log(array.filterAndMap(
 
 <br>
 
-- **`pushWithSort()`** => Adds the value you entered sequentially into the array
+- **`pushWithSort()`** => Adds the value you entered sequentially into the array.
 ```js
 const array = [1, 2, 4, 5];
 
@@ -132,17 +132,47 @@ console.log(array)
 
 <br>
 
-- **`difference()`** => Returns the differences between the array you entered and the original array as an array
+- **`swap()`** => Swaps two values in array. The entered values are index values.
 ```js
-const array = [1, 2, 3, 4, 5];
+const array = [4, 2, 3, 1, 5];
 
-console.log(array.difference([3, 4, 5, 6, 7]))
-// [1, 2, 6, 7]
+array.swap(0, 3);
+
+console.log(array)
+// [1, 2, 3, 4, 5]
 ```
 
 <br>
 
-- **`similar()`** => Returns a string of similarities between the string you entered and the original string
+- **`count()`** => Counts how many times the value you entered occurs in the array. **If you entered a function, the function returns the number of appropriate numbers.**
+```js
+const array = [1, 2, 3, 4, 5];
+
+console.log(array.count(1)) // 1
+
+console.log(array.count(
+    (number, index, thisArray) => {
+      return number >= 3
+    })
+) // 3
+```
+
+<br>
+
+- **`shuffle()`** => Randomly shuffles elements in an array.
+```js
+const array = [1, 2, 3, 4, 5];
+
+console.log(array.shuffle())
+// [5, 3, 4, 1, 2]
+
+console.log(array.shuffle())
+// [2, 5, 3, 4, 1]
+```
+
+<br>
+
+- **`similar()`** => Returns a string of similarities between the string you entered and the original string.
 ```js
 const array = [1, 2, 3, 4, 5];
 
@@ -152,7 +182,7 @@ console.log(array.similar([3, 4, 5, 6, 7]))
 
 <br>
 
-- **`removeDuplicate()`** => Removes all duplicate values in the array
+- **`removeDuplicate()`** => Removes all duplicate values in the array.
 ```js
 const array = [1, 2, 3, 4, 5, 1, 5, 4, 3, 2];
 
@@ -162,7 +192,7 @@ console.log(array.removeDuplicate())
 
 <br>
 
-- **`group()`** => Groups the array so that the value in the array is the length of the group where you enter the values
+- **`group()`** => Groups the array so that the value in the array is the length of the group where you enter the values.
 ```js
 const array = [1, 2, 3, 4, 5, 6];
 
@@ -172,7 +202,7 @@ console.log(array.group(2))
 
 <br>
 
-- **`toObject()`** => Converts the array to an object
+- **`toObject()`** => Converts the array to an object.
 ```js
 const array = [1, 2, 3, 4, 5];
 
@@ -182,7 +212,7 @@ console.log(array.toObject())
 
 <br>
 
-- **`toSet()`** => Converts the array to a Set Function
+- **`toSet()`** => Converts the array to a Set Function.
 ```js
 const array = [1, 2, 3, 4, 5, 1, 5, 4, 3, 2];
 
@@ -193,6 +223,10 @@ console.log(array.toSet())
 <br>
 
 # Updates
+
+## v0.0.2
+
+- Added `.shuffle()`, `.swap()` and `.count()` functions.
 
 ## v0.0.1
 
@@ -217,7 +251,7 @@ Please do not forget to use it in the latest version for more **stable** and **p
 
 # And finally
 
-- If you want to support this module, if you request me on [github](https://github.com/pordarman), I will be happy to help you
+- If you want to support this module, if you request me on [github](https://github.com/pordarman), I will be happy to help you.
 
 - Thank you for reading this far, i love you 💗
 

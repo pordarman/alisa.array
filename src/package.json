@@ -1,6 +1,6 @@
 {
   "name": "alisa.array",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Advanced functions that are not in JavaScript's default array functions",
   "main": "index.js",
   "repository": {
