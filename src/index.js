@@ -7,6 +7,32 @@
  */
 
 
+/**
+ * Binary Search Find Index Function
+ * @param {Array} array 
+ * @param {Number} number 
+ * @param {(array: Array, index: Number) => Number} operator 
+ * @returns 
+ */
+function binarySearchFindIndex(array, number, operator = (array, index) => array[index]) {
+    let startIndex = 0;
+    let endIndex = array.length;
+
+    while (startIndex < endIndex) {
+        const middleIndex = Math.floor((endIndex + startIndex) / 2);
+        const middleValue = operator(array, middleIndex);
+
+        if (middleValue === number) {
+            return middleIndex + 1;
+        } else if (middleValue > number) {
+            endIndex = middleIndex == endIndex ? middleIndex - 1 : middleIndex;
+        } else {
+            startIndex = middleIndex == startIndex ? middleIndex + 1 : middleIndex;
+        }
+    }
+    return startIndex;
+}
+
 
 
 
@@ -18,14 +44,16 @@
  */
 
 function sameObject(object1, object2) {
-    let objectEnt1 = Object.entries(object1)
-    let objectEnt2 = Object.entries(object2)
-    if (objectEnt1.length != objectEnt2.length) return false
+    const objectEnt1 = Object.entries(object1);
+    const objectEnt2 = Object.entries(object2);
+
+    if (objectEnt1.length != objectEnt2.length) return false;
+
     for (const [key, value_1] of objectEnt1) {
-        let obj = objectEnt2.find(a => a[0] === key)
-        if (!obj || !sameValue(value_1, obj[1])) return false
+        const value_2 = object2[key];
+        if (!sameValue(value_1, value_2)) return false;
     }
-    return true
+    return true;
 }
 
 /**
@@ -36,149 +64,286 @@ function sameObject(object1, object2) {
  */
 
 function sameValue(value1, value2) {
-    try {
-        if (value1 === value2) return true;
-        let pro1 = Object.prototype.toString.call(value1)
-        let pro2 = Object.prototype.toString.call(value2)
-        if (pro1 !== pro2) return false
-        switch (pro1) {
-            case "[object String]":
-            case "[object Number]":
-            case "[object Boolean]": {
-                return value1 === value2
-            }
-            case "[object Array]": {
-                return sameArray(value1, value2)
-            }
-            case "[object Date]": {
-                return value1.getTime() === value2.getTime()
-            }
-            case "[object Object]": {
-                return sameObject(value1, value2)
-            }
+    if (value1 === value2) return true;
+    if (isNaN(value1) && isNaN(value2)) return true;
+
+    const pro1 = Object.prototype.toString.call(value1);
+    const pro2 = Object.prototype.toString.call(value2);
+
+    // If the entered values are not the same type, return false
+    if (pro1 !== pro2) return false;
+
+    // Check based on the type of the entered value
+    // String, Number, Boolean, Array, Object
+    switch (pro1) {
+        case "[object String]":
+        case "[object Number]":
+        case "[object Boolean]": {
+            return false;
         }
-        if (value1 instanceof Set && value2 instanceof Set) return sameArray([...value1], [...value2])
-        if (value1 instanceof Map && value2 instanceof Map) return sameArray([...value1.entries()], [...value2.entries()])
-        if (value1 instanceof RegExp && value2 instanceof RegExp) return (value1.source === value2.source) && (value1.flags === value2.flags)
-        if (value1?.prototype !== undefined) return value1?.prototype === value2?.prototype
-        if (value1?.name !== undefined) return value1?.name === value2?.name
-    } catch (e) { }
-    return false
-}
-
-/**
- * Checks if the entered Arrays are the same
- * @param {Array} array1 
- * @param {Array} array2 
- * @returns {Boolean}
- */
-
-function sameArray(array1, array2) {
-    let length = array1.length;
-    if (length != array2.length) return false
-    for (let index = 0; index < length; ++index) {
-        if (!sameValue(array1[index], array2[index])) return false;
+        case "[object Array]": {
+            return sameArray(value1, value2);
+        }
+        case "[object Object]": {
+            return sameObject(value1, value2);
+        }
     }
-    return true;
-}
 
+    // Map, Set, RegExp, Date, ArrayBuffer
+    if (value1 instanceof Set && value2 instanceof Set) return sameArray([...value1], [...value2]);
+    if (value1 instanceof Map && value2 instanceof Map) return sameArray([...value1.entries()], [...value2.entries()]);
+    if (value1 instanceof RegExp && value2 instanceof RegExp) return (value1.source === value2.source) && (value1.flags === value2.flags);
+    if (value1 instanceof Date && value2 instanceof Date) return value1.getTime() === value2.getTime();
+    if (value1 instanceof ArrayBuffer && value2 instanceof ArrayBuffer) {
+        if (value1.byteLength !== value2.byteLength) return false;
+        return sameArray(new Uint8Array(value1), new Uint8Array(value2));
+    }
+
+    // prototype, constructor, name, toString
+    if (value1?.prototype !== undefined) return value1?.prototype === value2?.prototype;
+    if (value1?.constructor !== undefined) return value1?.constructor === value2?.constructor;
+    if (value1?.constructor?.name !== undefined) return value1?.constructor?.name === value2?.constructor?.name;
+    if (value1?.constructor?.toString() !== undefined) return value1?.constructor?.toString() === value2?.constructor?.toString();
+    if (value1?.toString() !== undefined) return value1?.toString() === value2?.toString();
+
+    // Symbol, BigInt, Error, Promise, Function
+    if (value1 instanceof Symbol && value2 instanceof Symbol) return value1.description === value2.description;
+    if (value1 instanceof BigInt && value2 instanceof BigInt) return value1.toString() === value2.toString();
+    if (value1 instanceof Error && value2 instanceof Error) return sameObject(value1, value2);
+    if (value1 instanceof Promise && value2 instanceof Promise) return sameValue(value1.then(), value2.then());
+    if (value1 instanceof Function && value2 instanceof Function) return value1.toString() === value2.toString();
+    return false;
+}
 
 
 /**
  * Checks if the entered arrays are the same array
- * @param {Array} inputArray - Array to check
+ * @param {Array} array - Main array
+ * @param {Array} otherArray - Array to check
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
- * const array = [1, 2, 3, 4, 5]
+ * const array = [1, 2, 3, 4, 5];
  * 
  * // Then let's create a new array and check if it's the same array
- * const array1 = [1, 2, 3, 4, 5]
+ * const otherArray = [1, 2, 3, 4, 5];
  * 
- * if (array.sameArray(array1)) {
- *   console.log("Both arrays are the same!")
+ * if (ArrayUtil.sameArray(array, otherArray)) {
+ *   console.log("Both arrays are the same!");
  * } else {
- *   console.log("No two arrays are the same :(")
+ *   console.log("No two arrays are the same :(");
  * }
  * @returns {Boolean}
  */
 
-Array.prototype.sameArray = function (inputArray) {
+function sameArray(array, otherArray) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (!Array.isArray(otherArray)) throw new TypeError(`The "otherArray" data you entered (${otherArray}) is not an Array!`);
 
-    // Return false if the entered value is not an array
-    if (!Array.isArray(inputArray)) return false;
+    // If the length of the arrays are different, return false
+    if (array.length !== otherArray.length) return false;
 
     // Check if the entered values are the same
-    return sameArray(this, inputArray)
+    for (let i = 0; i < array.length; ++i) {
+        const value1 = array[i];
+        const value2 = otherArray[i];
+
+        // If the entered values are not the same, return false
+        if (!sameValue(value1, value2)) return false;
+    }
+    return true;
 
 }
 
+/**
+ * Returns all permutations of the given array
+ * @param {Array} array - Main array
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const perms = ArrayUtil.permutations([1, 2, 3]);
+ * console.log(perms); // [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+ * 
+ * @returns {Array<Array>} All possible permutations of the input array
+ */
+function permutations(array) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+
+    const result = [];
+
+    function permute(arr, m = []) {
+        if (arr.length === 0) {
+            result.push(m);
+        } else {
+            for (let i = 0; i < arr.length; i++) {
+                const current = arr.slice();
+                const next = current.splice(i, 1);
+                permute(current.slice(), m.concat(next));
+            }
+        }
+    }
+
+    permute(array);
+    return result;
+}
+
+
+/**
+ * Filters only even numbers from the array
+ * @param {Array} array - Main array
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const evens = ArrayUtil.onlyEvens([1, 2, 3, 4, 5, 6]);
+ * console.log(evens); // [2, 4, 6]
+ * 
+ * @returns {Array} Array with only even numbers
+ */
+function onlyEvens(array) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    return array.filter(value => typeof value === 'number' && value % 2 === 0);
+}
+
+
+/**
+ * Filters only odd numbers from the array
+ * @param {Array} array - Main array
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const odds = ArrayUtil.onlyOdds([1, 2, 3, 4, 5, 6]);
+ * console.log(odds); // [1, 3, 5]
+ * 
+ * @returns {Array} Array with only odd numbers
+ */
+function onlyOdds(array) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    return array.filter(value => typeof value === 'number' && value % 2 !== 0);
+}
+
+
+/**
+ * Returns a reversed copy of the array
+ * @param {Array} array - Main array
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const reversed = ArrayUtil.reversed([1, 2, 3]);
+ * console.log(reversed); // [3, 2, 1]
+ * 
+ * @returns {Array} A new array with elements in reverse order
+ */
+function reversed(array) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    return [...array].reverse();
+}
+
+/**
+ * Returns the maximum value from the array
+ * @param {Array} array - Main array
+ * @param {(value: any, index: Number, this: Array) => Boolean} [callback] - Used to check the value (Should return boolean)
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const max = ArrayUtil.max([1, 2, 3, 10, 4]);
+ * console.log(max); // 10
+ * 
+ * @returns {number} The largest number in the array
+ */
+function max(array, callback = (value) => value) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof callback !== "function") throw new TypeError(`The "callback" data you entered (${callback}) is not a function!`);
+
+    let maxNum = -Infinity;
+    let maxVal;
+
+    for (let i = 0; i < array.length; ++i) {
+        const value = array[i];
+        if (typeof value !== "number") continue;
+
+        const num = callback(value, i, this);
+        if (num > maxNum) {
+            maxNum = num;
+            maxVal = value;
+        }
+    }
+    return maxVal;
+}
+
+
+/**
+ * Returns the minimum value from the array
+ * @param {Array} array - Main array
+ * @param {(value: any, index: Number, this: Array) => Boolean} [callback] - Used to check the value (Should return boolean)
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const min = ArrayUtil.min([1, 2, 3, 10, 4]);
+ * console.log(min); // 1
+ * 
+ * @returns {number} The smallest number in the array
+ */
+function min(array, callback = (value) => value) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof callback !== "function") throw new TypeError(`The "callback" data you entered (${callback}) is not a function!`);
+
+    let minNum = -Infinity;
+    let minVal;
+
+    for (let i = 0; i < array.length; ++i) {
+        const value = array[i];
+        if (typeof value !== "number") continue;
+
+        const num = callback(value, i, this);
+        if (num < minNum) {
+            minNum = num;
+            minVal = value;
+        }
+    }
+    return minVal;
+}
 
 
 /**
  * Returns index values by searching the entered value in the array
+ * @param {Array} array - Main array
  * @param {any} searchValue - Value to search
  * @param {Number} [length=Infinity] - Maximum length of array to return
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5, 1]
  * 
  * // Then let's enter the value to look for
- * const indexs = array.allIndexOf(1)
+ * const indexs = ArrayUtil.allIndexOf(array, 1)
  * 
  * console.log(index)
  * // [0, 5]
- * 
- * 
- * const indexs1 = array.allIndexOf(6)
- * 
- * console.log(indexs1)
- * // -1
- * @returns {Array<Number>|Number} - Returns -1 if no value was found, an array if found
+ * @returns {Array<Number>} - Returns empty array if no value was found, an array if found
  */
 
-Array.prototype.allIndexOf = function (searchValue, length) {
+function allIndexOf(array, searchValue, length) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (length !== undefined && typeof length !== "number") throw new TypeError(`The "length" data you entered (${length}) is not a number!`);
 
-    // Converts the entered value to a number
-    length = Math.floor(length);
-
-    // Array to store index values
     const allIndex = [];
 
-    // If length is not specified use this loop
-    if (isNaN(length)) {
+    for (let i = 0; i < array.length; ++i) {
+        // If the entered value and the searched value are the same, add the index value to the array
+        if (sameValue(array[i], searchValue)) {
+            allIndex.push(i);
 
-        for (const index in this) {
+            // Return array if "length" equals 1
 
-            // If the entered value and the searched value are the same, add the index value to the array
-            if (sameValue(this[index], searchValue)) allIndex.push(+index)
-
-        }
-
-    }
-
-    // Use this loop if maximum length of array is specified
-    else {
-        for (const index in this) {
-
-            // If the entered value and the searched value are the same, add the index value to the array
-            if (sameValue(this[index], searchValue)) {
-
-                allIndex.push(+index);
-
-                // Return array if "length" equals 1
-
-                // Not 0 because we check first and then reduce
-                // If we reduced first and then checked we would check if it equals 0
-                if (length === 1) return allIndex;
-                length -= 1;
-            }
-
+            // Not 0 because we check first and then reduce
+            // If we reduced first and then checked we would check if it equals 0
+            if (length <= 1) return allIndex;
+            length -= 1;
         }
     }
-
-    // Return -1 if no value is found
-    return allIndex.length === 0 ? -1 : allIndex
-
+    return allIndex;
 }
 
 
@@ -186,102 +351,94 @@ Array.prototype.allIndexOf = function (searchValue, length) {
 
 /**
  * Returns the index of values that match the function.
+ * @param {Array} array - Main array
  * @param {( value: any, index: Number, this: Array ) => Boolean} findIndexCallback - For filter function (Should return boolean)
  * @param {Number} [length=Infinity] - Maximum length of array to return
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = ["Hello", "World", "Hi", "!"]
  * 
  * // And by entering a function, let's return the index values of the values we want.
- * const indexs = array.findIndexAll(value => value.startsWith("H"))
+ * const indexs = ArrayUtil.findIndexAll(array, value => value.startsWith("H"))
  * 
  * console.log(indexs)
  * // [0, 1]
- * @returns {Array<Number>|Number} - Returns -1 if no value was found, an array if found
+ * @returns {Array<Number>} - Returns empty array if no value was found, an array if found
  */
 
-Array.prototype.findIndexAll = function (findIndexCallback, length) {
+function findIndexAll(array, findIndexCallback, length) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof findIndexCallback !== "function") throw new TypeError(`The "findIndexCallback" data you entered (${findIndexCallback}) is not a function!`);
+    if (length !== undefined && typeof length !== "number") throw new TypeError(`The "length" data you entered (${length}) is not a number!`);
 
-    // If the entered value are not a function, throw a TypeError
-    if (typeof findIndexCallback !== "function") throw new TypeError(`${findIndexCallback} is not a function`)
-
-    // Converts the entered value to a number
-    length = Math.floor(length);
-
-    // Array to store index values
     const allIndex = [];
 
-    // If length is not specified use this loop
-    if (isNaN(length)) {
+    for (let i = 0; i < array.length; ++i) {
+        // If the entered value and the searched value are the same, add the index value to the array
+        if (findIndexCallback(array[i], i, this)) {
+            allIndex.push(i);
 
-        for (const index in this) {
+            // Return array if "length" equals 1
 
-            // If the entered value and the searched value are the same, add the index value to the array
-            if (findIndexCallback(this[index], index, this)) allIndex.push(+index)
-
-        }
-
-    }
-
-    // Use this loop if maximum length of array is specified
-    else {
-        for (const index in this) {
-
-            // If the entered value and the searched value are the same, add the index value to the array
-            if (findIndexCallback(this[index], index, this)) {
-
-                allIndex.push(+index);
-
-                // Return array if "length" equals 1
-
-                // Not 0 because we check first and then reduce
-                // If we reduced first and then checked we would check if it equals 0
-                if (length === 1) return allIndex;
-                length -= 1;
-            }
-
+            // Not 0 because we check first and then reduce
+            // If we reduced first and then checked we would check if it equals 0
+            if (length <= 1) return allIndex;
+            length -= 1;
         }
     }
 
-    // Return -1 if no value is found
-    return allIndex.length === 0 ? -1 : allIndex
-
+    return allIndex;
 }
 
 
 
 /**
  * Combines multiple arrays at once
- * @param  {...any} arrays - Arrays to merge
+ * @param {Array} array - Main array
+ * @param  {...Array} arrays - Arrays to merge
  * @example
- * // First let's create an array
- * const array = [1, 2, 3, 4, 5]
+ * const ArrayUtil = require("alisa.array");
  * 
- * // Then let's combine this with other arrays
- * const concatArray = array.concatAll([6, 7, 8], [9, 10], [11, 12])
+ * // Combine all arrays
+ * const concatArray = ArrayUtil.concatAll([1, 2, 3, 4, 5], [6, 7, 8], [9, 10], [11, 12])
  * 
  * console.log(concatArray)
- * // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+ * // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
  * @returns {Array}
  */
 
-Array.prototype.concatAll = function (...arrays) {
-    return [...this, ...arrays.flat()]
+function concatAll(array, ...arrays) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+
+    const result = [...array];
+    for (const inputArray of arrays) {
+        if (!Array.isArray(inputArray)) throw new TypeError(`The "array" data you entered has (${inputArray}) is not an Array!`);
+        result.push(...inputArray);
+    }
+    return result;
 }
 
 
 
 /**
  * Allows simultaneous use of filter and map functions
+ * @param {Array} array - Main array
  * @param {( value: any, index: Number, this: Array ) => Boolean} filterCallback - For filter function (Should return boolean)
  * @param {( value: any, index: Number, this: Array ) => any} mapCallback - For map function
  * @param {filterAndMapObject} param2 - Extra options
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5]
  * 
  * // Then let's enter both our filter and map functions and return the values we want
  * const filterAndMapArray = array.filterAndMap(
+ *    // This is main array
+ *    array,
+ *    
  *    // This is filter function
  *    value => value > 2,
  * 
@@ -300,214 +457,233 @@ Array.prototype.concatAll = function (...arrays) {
  * @returns {Array}
  */
 
-Array.prototype.filterAndMap = function (filterCallback, mapCallback, { length, startIndex, thisArgs } = {}) {
+function filterAndMap(array, filterCallback, mapCallback, { length, startIndex, thisArgs } = {}) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof filterCallback !== "function") throw new TypeError(`The "filterCallback" data you entered (${filterCallback}) is not a function!`);
+    if (typeof mapCallback !== "function") throw new TypeError(`The "mapCallback" data you entered (${mapCallback}) is not a function!`);
+    if (length !== undefined && typeof length !== "number") throw new TypeError(`The "length" data you entered (${length}) is not a number!`);
+    if (startIndex !== undefined && typeof startIndex !== "number") throw new TypeError(`The "startIndex" data you entered (${startIndex}) is not a number!`);
+    if (thisArgs !== undefined && !Array.isArray(thisArgs)) throw new TypeError(`The "thisArgs" data you entered (${thisArgs}) is not an Array!`);
 
-    // If the entered values are not a function, throw a TypeError
-    if (typeof filterCallback !== "function") throw new TypeError(`${filterCallback} is not a function`)
-    if (typeof mapCallback !== "function") throw new TypeError(`${mapCallback} is not a function`)
+    const arr = Array.isArray(thisArgs) ? thisArgs : array;
+    const result = [];
 
-    // If thisArgs expression is entered, make thisArgs the default array
-    let forArray = Array.isArray(thisArgs) ? thisArgs : this,
+    if (startIndex < 0) startIndex = 0;
 
-        // Array to return at the end
-        returnArray = [],
+    for (let index = startIndex; index < arr.length; ++index) {
+        const val = arr[index];
 
-        // Save memory and performance by caching the length of the array
-        arrayLength = forArray.length,
-        startIndexForLoop = Math.floor(startIndex) || 0;
+        // Check if the value and push to the result array if it is true
+        if (filterCallback.call(arr, val, index, this)) {
+            result.push(mapCallback.call(arr, val, index, this));
 
-    // Equal to 0 if a negative value is entered (in terms of performance)
-    if (startIndexForLoop < 0) startIndexForLoop = 0
-
-    // Converts the entered value to a number
-    length = Math.floor(length)
-
-    // Use this function if the array is not constrained
-    if (isNaN(length)) {
-        for (let index = startIndexForLoop; index < arrayLength; ++index) {
-            let val = forArray[index];
-
-            // If this value passes through the filter function, add the desired value to the array using the map function
-            if (filterCallback(val, index, forArray)) returnArray.push(mapCallback(val, index, forArray));
-
+            // If the length is 1 or less, return the result array
+            if (length <= 1) return result;
+            length -= 1;
         }
     }
 
-    // Use this function if the array is constrained
-    else {
-        for (let index = startIndexForLoop; index < arrayLength; ++index) {
-            let val = forArray[index];
-
-            // If this value passes through the filter function
-            // Add the desired value to the array using the map function
-            // And decrease "length" by 1
-            if (filterCallback(val, index, forArray)) {
-
-                returnArray.push(mapCallback(val, index, forArray));
-
-                // Return array if "length" equals 1
-
-                // Not 0 because we check first and then reduce
-                // If we reduced first and then checked we would check if it equals 0
-                if (length === 1) return returnArray;
-                length -= 1;
-            }
-        }
-    }
-    return returnArray;
+    return result;
 }
 
 
 
 /**
  * Adds the entered value to the array sequentially
- * @param {Number|String} value - Value to add to the array (It is recommended that the value be a string or number)
+ * @param {Array} array - Main array
+ * @param {any} value - Value to add to the array
+ * @param {(array: Array, index: Number) => Number} operator - Function to determine the index value to add the entered value to the array (default is array[index] but you can change it to array[index].length or array[index].id or something else)
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 4, 5]
  * 
  * // Then we enter the value to add
- * const sortedArray = array.pushWithSort(3)
+ * ArrayUtil.pushWithSort(array, 3)
  * 
  * console.log(sortedArray)
  * // [1, 2, 3, 4, 5]
- * @returns {Array}
+ * @returns {void}
  */
 
-Array.prototype.pushWithSort = function (value) {
+function pushWithSort(array, value, operator = (array, index) => array[index]) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof operator !== "function") throw new TypeError(`The "operator" data you entered (${operator}) is not a function!`);
 
-    // Return array if no value is entered
-    if (!(0 in arguments)) return this;
+    // If the entered value is not a number, return the array without changing anything
+    if (!(1 in arguments)) return;
 
-    // We find which index value to put the entered value in the array
-    let index = this.findIndex(arrayValue => arrayValue > value);
+    const index = binarySearchFindIndex(array, value, operator);
 
     // If the index value is equal to -1, we add the entered value to the end of the array
     if (index === -1) {
-        this.push(value);
-        return this;
+        array.push(value);
+        return;
     }
 
     // Using the splice function, we add the entered value to the index value we determined earlier
-    this.splice(index, 0, value)
-    return this;
+    array.splice(index, 0, value)
+    return;
 
+}
+
+
+/**
+ * Returns unique elements based on the result of a callback
+ * @param {Array} array - Main array
+ * @param {(value: any, index: Number, this: Array) => any} callback - Function to determine uniqueness (Should return boolean)
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const users = [{id: 1}, {id: 2}, {id: 1}];
+ * const result = ArrayUtil.uniqueBy(users, u => u.id);
+ * 
+ * console.log(result); // [{id: 1}, {id: 2}]
+ * @returns {Array}
+ */
+function uniqueBy(array, callback) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof callback !== "function") throw new TypeError(`The "callback" data you entered (${callback}) is not a function!`);
+
+    const seen = new Set();
+    return array.filter((item, index, arr) => {
+        const key = callback(item, index, arr);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+
+/**
+ * Flattens nested arrays up to a given depth
+ * @param {Array} array - Main array
+ * @param {Number} depth - Flatten depth (default 1)
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * const arr = [1, [2, [3, 4]], 5];
+ * const result = ArrayUtil.flatten(arr, 2);
+ * 
+ * console.log(result); // [1, 2, 3, 4, 5]
+ * @returns {Array}
+ */
+function flatten(array, depth = 1) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof depth !== "number") throw new TypeError(`The "depth" data you entered (${depth}) is not a number!`);
+
+    return depth > 0
+        ? array.reduce((acc, val) => acc.concat(Array.isArray(val) ? flatten(val, depth - 1) : val), [])
+        : array.slice();
 }
 
 
 
 /**
  * Swaps two values in the original array
+ * @param {Array} array - Main array
  * @param {Number} index1 - Index value of the index to be changed
  * @param {Number} index2 - Index value of the index to be changed
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [4, 2, 3, 1, 5]
  * 
  * // And then let's replace index 0 with index 3
- * array.swap(0, 4);
+ * ArrayUtil.swap(array, 0, 4);
  * 
  * console.log(array)
  * // [1, 2, 3, 4, 5]
- * @returns {Array}
+ * @returns {void}
  */
 
-Array.prototype.swap = function (index1, index2) {
-
-    // Converts the entered value to a number
-    index1 = Math.floor(index1);
-    index2 = Math.floor(index2);
-
-    // If at least one of the entered values is not a number, return the array without changing anything
-    if (isNaN(index1) || isNaN(index2)) return this;
+function swap(array, index1, index2) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof index1 !== "number") throw new TypeError(`The "index1" data you entered (${index1}) is not a number!`);
+    if (typeof index2 !== "number") throw new TypeError(`The "index2" data you entered (${index2}) is not a number!`);
+    if (index1 < 0 || index2 < 0) throw new RangeError(`The "index1" and "index2" data you entered (${index1}, ${index2}) cannot be less than 0!`);
+    if (index1 >= array.length || index2 >= array.length) throw new RangeError(`The "index1" and "index2" data you entered (${index1}, ${index2}) cannot be greater than the length of the array!`);
 
     // Then we replace the values corresponding to those indexes.
-    [this[index1], this[index2]] = [this[index2], this[index1]];
-
-    return this;
-
+    [array[index1], array[index2]] = [array[index2], array[index1]];
 }
 
 
 
 /**
  * Counts how many times the value you entered occurs in the array, if you entered a function instead of a value, it returns the number of values that provide the function
+ * @param {Array} array - Main array
  * @param {any} value - Value to count in array
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5]
  * 
  * // Then let's see how many times 1 is in the series.
- * const countOne = array.count(1)
+ * const countOne = ArrayUtil.count(array, 1)
  * 
  * console.log(countOne) // 1
  * 
  * // Now let's see how many numbers greater than 3 are in the array
- * const greaterThan3 = array.count((number, index, thisArray) => number > 3)
+ * const greaterThan3 = ArrayUtil.count(array, (number, index, thisArray) => number > 3)
  * 
  * console.log(greaterThan3) // 2
  * @returns {Number}
  */
 
-Array.prototype.count = function (value) {
+function count(array, value) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
 
     // Return 0 if no value parameter is entered
-    if (!(0 in arguments)) return 0;
+    if (!(1 in arguments)) return 0;
 
     let total = 0;
 
-    // Use this loop if the entered value is a function
+    // Use loop if the entered value is a function
     if (typeof value === "function") {
-
-        for (const index in this) {
-            if (value(this[index], index, this)) total += 1;
+        for (let i = 0; i < array.length; ++i) {
+            if (value(array[i], i, this)) total += 1;
         }
-
     }
 
-    // Use this loop if the entered value is not a function
+    // Use loop if the entered value is not a function
     else {
-
-        for (const inputArray of this) {
-            if (sameValue(inputArray, value)) total += 1;
+        for (let i = 0; i < array.length; ++i) {
+            if (sameValue(array[i], value)) total += 1;
         }
-
     }
 
     return total;
-
 }
 
 
 
 /**
  * Randomly shuffles elements in an array
+ * @param {Array} array - Main array
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5]
  * 
  * // Then let's randomly shuffle the elements in the array
- * const shuffle1 = array.shuffle()
- * 
+ * const shuffle1 = ArrayUtil.shuffle(array)
  * console.log(shuffle1) // [4, 2, 5, 3, 1]
  * 
- * const shuffle2 = array.shuffle()
- * 
+ * const shuffle2 = ArrayUtil.shuffle(array)
  * console.log(shuffle2) // [3, 1, 4, 2, 5]
  * @returns {Array}
  */
 
-Array.prototype.shuffle = function () {
-
-    // To make the code more optimised, we first save the length of the array
-    let length = this.length;
-
-    // And we save a copy of the array
-    let copyArray = [...this];
-
-    // Then we randomly shuffle the array using the Array.from function
-    return Array.from({ length }, () => {
-        return copyArray.splice(Math.floor(Math.random() * length--), 1)[0]
+function shuffle(array) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    const copyArray = [...array];
+    return Array.from({ length: array.length }, () => {
+        return copyArray.splice(Number(Math.random() * copyArray.length), 1)[0]
     })
 
 }
@@ -516,8 +692,11 @@ Array.prototype.shuffle = function () {
 
 /**
  * Returns the different values between the array you entered and the original array
+ * @param {Array} array - Main array
  * @param {Array} inputArray - Array to check
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5]
  * 
@@ -525,181 +704,194 @@ Array.prototype.shuffle = function () {
  * const otherArray = [3, 4, 5, 6, 7]
  * 
  * // Then print the differences between them to the console using the difference method
- * const difference = array.difference(otherArray)
+ * const difference = ArrayUtil.difference(array, otherArray)
  * 
  * console.log(difference)
  * // [1, 2, 6, 7]
  * @returns 
  */
 
-Array.prototype.difference = function (inputArray) {
-
-    // Return the array itself if no array is entered
-    if (!Array.isArray(inputArray)) return this;
+function difference(array, otherArray) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (!Array.isArray(otherArray)) throw new TypeError(`The "otherArray" data you entered (${otherArray}) is not an Array!`);
 
     // Removes duplicate data from arrays to save memory and performance
-    let thisArray = [...new Set(this)];
-    inputArray = [...new Set(inputArray)]
+    const removedArray = removeDuplicate(array);
+    const otherRemovedArray = removeDuplicate(otherArray);
 
-    // First I create an empty object and save the values in the arrays to the object
-    // But when the same value comes for the 2nd time, we will save it to the "ban" array we created before, since we will no longer save it
-    // Thus, we save memory because it will pass without saving the values inside the ban value
-    let obj = { ban: new Set() },
+    const ban = new Set();
+    const concatedArray = [...removedArray, ...otherRemovedArray];
+    const result = [];
 
-        // Then we concatenate the two arrays and start the for loop
-        forArray = [...thisArray, ...inputArray];
+    function hasResult(value) {
+        for (const val of result) {
+            if (sameValue(val, value)) return true;
+        }
+        return false;
+    }
 
-    for (const input of forArray) {
-
+    for (const input of concatedArray) {
         // Continue saving if input value is in ban array
-        if (obj.ban.has(input)) continue;
+        if (ban.has(input)) continue;
 
-        // If we have saved the input value before, delete that input value from the object and add the input value to the ban array
-        if (obj[input]) {
-            delete obj[input];
-            obj.ban.add(input);
+        if (hasResult(input)) {
+            // If the input value is already in the result array, add it to the ban array
+            ban.add(input);
             continue;
         }
 
-        // Save input value to object
-        obj[input] = true;
-
+        // If the input value is not in the result array, add it to the result array
+        result.push(input);
     }
 
-    // Finally, delete the "ban" value from the object and return the object's key data
-    delete obj.ban
-
-    return Object.keys(obj)
-
+    return result.filter(value => !ban.has(value));
 }
 
 
 
 /**
  * Removes duplicated data in arrays
+ * @param {Array} array - Main array
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5, 1, 2, 3]
  * 
  * // Then let's remove the copied data and print it to the console
- * const removeDuplicate = array.removeDuplicate()
+ * const removeDuplicate = ArrayUtil.removeDuplicate(array)
  * 
  * console.log(removeDuplicate)
  * // [1, 2, 3, 4, 5]
  * @returns {Array}
  */
 
-Array.prototype.removeDuplicate = function () {
-
-    // Actually there are many ways to remove duplicates in arrays but we will use the fastest
-    return [...new Set(this)];
-
-    /**
-     * But other ways are:
-     * 
-     * => this.filter((value, index) => this.indexOf(value) === index)
-     * // This is almost the slowest and not recommended
-     * 
-     * => let array = [];
-     * for (const value of this) {
-     *   if (!array.includes(value)) array.push(value) 
-     * }
-     * return array
-     * // This is faster than the previous one but it is the fastest one among the ones we are using now
-     */
-
+function removeDuplicate(array,) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`)
+    return [...new Set(array)];
 }
 
 
 
 /**
- * Reruns the array by splitting it into groups
- * @param {Number} length - Length of groups
+ * Reruns the array by splitting it into chunks
+ * @param {Array} array - Main array
+ * @param {Number} length - Length of chunks
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
  * 
- * // Then we determine the length of the groups and print them to the console
- * const group = array.group(2)
+ * // Then we determine the length of the chunks and print them to the console
+ * const chunk = ArrayUtil.chunk(array, 2)
  * 
- * console.log(group)
+ * console.log(chunk)
  * // [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]]
  * @returns {Array<Array>}
  */
 
-Array.prototype.group = function (length) {
+function chunk(array, length) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (length !== undefined && typeof length !== "number") throw new TypeError(`The "length" data you entered (${length}) is not a number!`);
+    if (length < 0) throw new RangeError(`The "length" data you entered (${length}) cannot be less than 0!`);
 
-    // Converts the entered value to a number
-    length = Math.floor(length);
-
-    // Return only 1 group if the entered value is not a number or less than or equal to 0
-    if (isNaN(length) || length <= 0) return [this];
-
-    // Then we divide into groups using the Array.from method
     return Array.from(
-        {
-            length: Math.ceil(this.length / length) // We determine the length of the array
-        },
-        (_, index) => {
+        { length: Math.ceil(array.length / length) },
+        (_, index) => array.slice(index * length, (index + 1) * length)
+    );
+}
 
-            // Then we divide it into groups using the slice method
-            return this.slice(index * length, (index + 1) * length);
-        }
-    )
+
+/**
+ * Groups the array by the function you entered
+ * @param {Array} array - Main array
+ * @param {(value: any, index: Number, this: Array) => any} callback - Function to group the array by
+ * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
+ * // First let's create an array
+ * const array = [1, 2, 3, 4, 5, 6];
+ * 
+ * // Then we group the array by odd and even numbers and print it to the console
+ * const groupedArray = ArrayUtil.groupBy(array, (value) => value % 2 === 0 ? "even" : "odd");
+ * 
+ * console.log(groupedArray); // { odd: [1, 3, 5], even: [2, 4, 6] }
+ * @returns {Object}
+ */
+function groupBy(array, callback) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (typeof callback !== "function") throw new TypeError(`The "callback" data you entered (${callback}) is not a function!`);
+
+    const result = {};
+
+    for (let i = 0; i < array.length; ++i) {
+        const value = array[i];
+        const key = callback(value, i, this);
+        if (!result[key]) result[key] = [];
+        result[key].push(value);
+    }
+
+    return result;
 }
 
 
 
 /**
  * Converts an array to an object
+ * @param {Array} array - Main array
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = ["Hello", "World", "!"]
  * 
  * // Then we convert this array to object and print it to console
- * const object = array.toObject()
+ * const object = ArrayUtil.toObject(array)
  * 
  * console.log(object)
  * // { 0: "Hello", 1: "World", 2: "!" }
  * @returns {Object}
  */
 
-Array.prototype.toObject = function () {
-
-    // Here we return an array to an object using the Object.fromEntries method
-    return Object.fromEntries(this.entries())
-
+function toObject(array,) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`)
+    return Object.fromEntries(array.entries());
 }
 
 
 
 /**
  * Converts an array to a Set function
+ * @param {Array} array - Main array
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = ["Hello", "World", "!"]
  * 
  * // Then we convert this array to Set function and print it to console
- * const set = array.toSet()
+ * const set = ArrayUtil.toSet(array)
  * 
  * console.log(set)
  * // Set(3) { 'Hello', 'World', '!' }
  * @returns {Set}
  */
 
-Array.prototype.toSet = function () {
-
-    // Here we return an array to a Set function using the new Set() method
-    return new Set(this)
-
+function toSet(array) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`)
+    return new Set(array);
 }
 
 
 
 /**
  * Returns an array of the same values in the original array as the array you entered
- * @param {Array} inputArray - Array to check
+ * @param {Array} array - Main array
+ * @param {Array} otherArray - Array to check
  * @example
+ * const ArrayUtil = require("alisa.array");
+ * 
  * // First let's create an array
  * const array = [1, 2, 3, 4, 5]
  * 
@@ -707,7 +899,7 @@ Array.prototype.toSet = function () {
  * const otherArray = [3, 4, 5, 6, 7]
  * 
  * // Then print the similarities between them to the console using the similar method.
- * const similar = array.similar(otherArray)
+ * const similar = ArrayUtil.similar(array, otherArray)
  * 
  * console.log(similar)
  * // [3, 4, 5]
@@ -715,38 +907,56 @@ Array.prototype.toSet = function () {
  */
 
 
-Array.prototype.similar = function (inputArray) {
-
-    // Return an empty array if the entered value is not an array
-    if (!Array.isArray(inputArray)) return [];
-
-    // Made for the next code to be more optimized
+function similar(array, otherArray) {
+    if (!Array.isArray(array)) throw new TypeError(`The "array" data you entered (${array}) is not an Array!`);
+    if (!Array.isArray(otherArray)) throw new TypeError(`The "otherArray" data you entered (${otherArray}) is not an Array!`);
 
     // This allows faster checking of data by converting the array to a set object.
-    let thisArray = new Set(this);
-    inputArray = new Set(inputArray);
+    const arrayToSet = toSet(array);
+    const otherArrayToSet = toSet(otherArray);
 
     // Then we'll do the for loop as long as the shorter one of the arrays
-    let smallestArray, longestArray;
-
-    if (thisArray.size > inputArray.size) {
-        smallestArray = inputArray;
-        longestArray = thisArray;
+    let smallestSet, longestSet;
+    if (arrayToSet.size > otherArrayToSet.size) {
+        smallestSet = otherArrayToSet;
+        longestSet = arrayToSet;
     } else {
-        smallestArray = thisArray;
-        longestArray = inputArray;
+        smallestSet = arrayToSet;
+        longestSet = otherArrayToSet;
     }
 
     const returnArray = [];
 
-    // And we start our for loop
-    for (const value of smallestArray) {
-
-        // Add value to array if value exists in other array
-        if (longestArray.has(value)) returnArray.push(value)
-
+    for (const value of smallestSet) {
+        if (longestSet.has(value)) returnArray.push(value);
     }
 
-    return returnArray
+    return returnArray;
+}
 
+module.exports = {
+    sameArray,
+    permutations,
+    onlyEvens,
+    onlyOdds,
+    reversed,
+    max,
+    min,
+    allIndexOf,
+    findIndexAll,
+    concatAll,
+    filterAndMap,
+    pushWithSort,
+    uniqueBy,
+    flatten,
+    swap,
+    shuffle,
+    count,
+    difference,
+    removeDuplicate,
+    chunk,
+    groupBy,
+    toObject,
+    toSet,
+    similar
 }
