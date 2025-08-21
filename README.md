@@ -2,7 +2,7 @@
 
 
 [![Package Name](https://img.shields.io/badge/Package%20name-alisa.array-red)](https://www.npmjs.com/package/alisa.array/)
-[![Package size](https://img.shields.io/bundlephobia/min/alisa.array?label=Package%20size)](https://www.npmjs.com/package/alisa.array/)
+[![Package size](https://img.shields.io/bundlejs/size/alisa.array?label=Package%20size)](https://www.npmjs.com/package/alisa.array/)
 [![Version](https://img.shields.io/npm/v/alisa.array.svg?label=Package%20version)](https://www.npmjs.com/package/alisa.array/)
 [![License](https://img.shields.io/npm/l/alisa.array.svg?label=License)](https://www.npmjs.com/package/alisa.array/)
 
