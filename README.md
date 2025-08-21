@@ -16,35 +16,7 @@
 
 # Creator(s)
 
-- [Ali (Fearless Crazy)](https://github.com/pordarman)
-
-<br>
-
-# Social media accounts
-
-- Ali: [Instagram](https://www.instagram.com/ali.celk/) - [Discord](https://discord.com/users/488839097537003521) - [Spotify](https://open.spotify.com/user/215jixxk4morzgq5mpzsmwwqa?si=41e0583b36f9449b)
-
-<br>
-
-## [![Alisa Logo](https://i.hizliresim.com/aug2sp9.png)](https://www.npmjs.com/package/alisa.array/)
-
-
-[![Package Name](https://img.shields.io/badge/Package%20name-alisa.array-red)](https://www.npmjs.com/package/alisa.array/)
-[![Package size](https://img.shields.io/bundlephobia/min/alisa.array?label=Package%20size)](https://www.npmjs.com/package/alisa.array/)
-[![Version](https://img.shields.io/npm/v/alisa.array.svg?label=Package%20version)](https://www.npmjs.com/package/alisa.array/)
-[![License](https://img.shields.io/npm/l/alisa.array.svg?label=License)](https://www.npmjs.com/package/alisa.array/)
-
-[![NPM](https://nodei.co/npm/alisa.array.png?downloads=true)](https://www.npmjs.com/package/alisa.array/)
-
-# Source file
-
-- [alisa.array](https://github.com/pordarman/alisa.array)
-
-<br>
-
-# Creator(s)
-
-- [Ali (Fearless Crazy)](https://github.com/pordarman)
+- [Ali Çelik](https://github.com/pordarman)
 
 <br>
 
